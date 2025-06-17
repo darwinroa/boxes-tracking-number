@@ -45,7 +45,51 @@ class BoxesTracker {
 
         return $data;
     }
+
+    /**
+     * Shortcode: [boxes_tracker tracking="1Z9999999999999999"]
+     */
+    public static function shortcode_boxes_tracker($atts) {
+        $atts = shortcode_atts([
+            'tracking' => '1Z9999999999999999', // valor por defecto
+        ], $atts);
+
+        $data = self::consultar_tracking_estatico_valor($atts['tracking']);
+
+        // Mostrar resultado como bloque <pre> para depuración
+        return '<pre>' . esc_html(print_r($data, true)) . '</pre>';
+    }
+
+    /**
+     * Consulta la API con tracking dinámico
+     */
+    public static function consultar_tracking_estatico_valor($tracking_number) {
+        $url = "https://boxes-tracker-api.diegoesolorzano.workers.dev/track";
+
+        $response = wp_remote_post($url, [
+            'headers' => [
+                'Content-Type' => 'application/json',
+            ],
+            'body' => json_encode([
+                'tracking_number' => $tracking_number,
+            ]),
+            'timeout' => 15,
+        ]);
+
+        if (is_wp_error($response)) {
+            return [
+                'error' => true,
+                'message' => $response->get_error_message(),
+            ];
+        }
+
+        $body = wp_remote_retrieve_body($response);
+        return json_decode($body, true);
+    }
 }
 
 // Inicializar el plugin
 BoxesTracker::init();
+
+// Registrar el shortcode boxes_tracker
+add_shortcode('boxes_tracker', ['BoxesTracker', 'shortcode_boxes_tracker']);
