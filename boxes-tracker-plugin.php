@@ -50,14 +50,26 @@ class BoxesTracker {
      * Shortcode: [boxes_tracker tracking="1Z9999999999999999"]
      */
     public static function shortcode_boxes_tracker($atts) {
-        $atts = shortcode_atts([
-            'tracking' => '1Z9999999999999999', // valor por defecto
-        ], $atts);
+        $tracking_number = isset($_GET['boxes_tracking_number']) ? sanitize_text_field($_GET['boxes_tracking_number']) : '';
 
-        $data = self::consultar_tracking_estatico_valor($atts['tracking']);
+        $form_html = '
+            <form method="get">
+                <label for="boxes_tracking_number">Número de seguimiento:</label>
+                <input type="text" id="boxes_tracking_number" name="boxes_tracking_number" value="' . esc_attr($tracking_number) . '" required />
+                <button type="submit">Consultar</button>
+            </form>
+        ';
 
-        // Mostrar resultado como bloque <pre> para depuración
-        return '<pre>' . esc_html(print_r($data, true)) . '</pre>';
+        if (empty($tracking_number)) {
+            return $form_html;
+        }
+
+        $data = self::consultar_tracking_estatico_valor($tracking_number);
+
+        $result_html = '<h3>Resultado de la consulta:</h3>';
+        $result_html .= '<pre>' . esc_html(print_r($data, true)) . '</pre>';
+
+        return $form_html . $result_html;
     }
 
     /**
