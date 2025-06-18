@@ -1,48 +1,67 @@
+:root {
+    --bt-font-family: 'Arial', sans-serif;
+    --bt-primary-color: red;
+    --bt-text-color: #222;
+    --bt-heading-color: #666;
+    --bt-subtext-color: #333;
+    --bt-border-color: #ddd;
+    --bt-bg-button: red;
+    --bt-button-text: white;
+}
+
 .bt__tracking-wrapper {
-    font-family: Arial, sans-serif;
+    font-family: var(--bt-font-family);
     max-width: 700px;
     margin: 20px auto;
 }
+
 .bt__header h2 {
     font-size: 2.5em;
     margin-bottom: 0;
-    border-bottom: 3px solid red;
+    border-bottom: 3px solid var(--bt-primary-color);
     display: inline-block;
     padding-bottom: 0.2em;
 }
+
 .bt__button {
     display: inline-block;
-    background: red;
-    color: white;
+    background: var(--bt-bg-button);
+    color: var(--bt-button-text);
     padding: 0.5em 1em;
     margin-top: 10px;
     text-decoration: none;
     font-weight: bold;
 }
+
 .bt__summary {
     margin-top: 20px;
 }
+
 .bt__summary p {
     font-size: 1.1em;
-    color: #333;
+    color: var(--bt-subtext-color);
 }
+
 .bt__events-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
 }
+
 .bt__events-table th,
 .bt__events-table td {
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--bt-border-color);
     padding: 10px;
     text-align: left;
 }
+
 .bt__events-table th {
     text-transform: uppercase;
-    color: #666;
+    color: var(--bt-heading-color);
     font-size: 0.9em;
 }
+
 .bt__events-table td {
-    color: #222;
+    color: var(--bt-text-color);
     font-size: 1em;
 }
