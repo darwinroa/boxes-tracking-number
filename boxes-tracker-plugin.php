@@ -47,39 +47,33 @@ class BoxesTracker {
     }
 
     /**
-     * Shortcode: [boxes_tracker tracking="1Z9999999999999999"]
+     * Shortcode: [boxes_tracker]
      */
     public static function shortcode_boxes_tracker($atts) {
-        $tracking_number = isset($_GET['boxes_tracking_number']) ? sanitize_text_field($_GET['boxes_tracking_number']) : '';
+        wp_enqueue_style('boxes-tracker-css');
+        wp_enqueue_script('boxes-tracker-js');
+        wp_enqueue_script('boxes-tracker-js', plugin_dir_url(__FILE__) . 'assets/js/boxes-tracker.js', [], false, true);
+        wp_localize_script('boxes-tracker-js', 'bt_ajax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('boxes-tracker-nonce'),
+        ]);
 
         $form_html = '
-            <form method="get">
-                <label for="boxes_tracking_number">Número de seguimiento:</label>
-                <input type="text" id="boxes_tracking_number" name="boxes_tracking_number" value="' . esc_attr($tracking_number) . '" required />
+            <form id="bt__form">
+                <label for="bt_tracking_number">Número de seguimiento:</label>
+                <input type="text" id="bt_tracking_number" name="tracking_number" required>
                 <button type="submit">Consultar</button>
             </form>
+            <div id="bt__result"></div>
         ';
 
-        if (empty($tracking_number)) {
-            return $form_html;
-        }
-
-        $data = self::consultar_tracking_estatico_valor($tracking_number);
-
-        ob_start();
-        include plugin_dir_path(__FILE__) . 'templates/tracking-result.php';
-        $result_html = ob_get_clean();
-
-
-        wp_enqueue_style('boxes-tracker-css');
-
-        return $form_html . $result_html;
+        return $form_html;
     }
 
     /**
      * Consulta la API con tracking dinámico
      */
-    public static function consultar_tracking_estatico_valor($tracking_number) {
+    public static function consultar_tracking_number($tracking_number) {
         $url = "https://boxes-tracker-api.diegoesolorzano.workers.dev/track";
 
         $response = wp_remote_post($url, [
@@ -110,8 +104,35 @@ BoxesTracker::init();
 // Registrar el shortcode boxes_tracker
 add_shortcode('boxes_tracker', ['BoxesTracker', 'shortcode_boxes_tracker']);
 
-// Registra el documento de estilos
+// Registrar scripts y estilos
 add_action('wp_enqueue_scripts', function () {
     wp_register_style('boxes-tracker-css', plugin_dir_url(__FILE__) . 'assets/css/boxes-tracker.css');
 });
 
+/**
+ * Handle AJAX 
+ */
+add_action('wp_ajax_boxes_tracker_lookup', 'boxes_tracker_ajax_lookup');
+add_action('wp_ajax_nopriv_boxes_tracker_lookup', 'boxes_tracker_ajax_lookup');
+
+function boxes_tracker_ajax_lookup() {
+    check_ajax_referer('boxes-tracker-nonce');
+
+    $tracking_number = sanitize_text_field($_POST['tracking_number'] ?? '');
+
+    if (empty($tracking_number)) {
+        wp_send_json_error('Número de seguimiento requerido.');
+    }
+
+    $data = BoxesTracker::consultar_tracking_number($tracking_number);
+
+    if (isset($data['error'])) {
+        echo '<p>Error: ' . esc_html($data['message']) . '</p>';
+        wp_die();
+    }
+
+    // Cargar plantilla
+    $tracking_number = $tracking_number; // disponible para la plantilla
+    include plugin_dir_path(__FILE__) . 'templates/tracking-result.php';
+    wp_die();
+}
