@@ -46,14 +46,22 @@ class BoxesTracker {
     }
 
     public static function shortcode_boxes_tracker() {
-        return '
-            <form id="bt__form">
-                <label for="bt_tracking_number">Número de seguimiento:</label>
-                <input type="text" id="bt_tracking_number" name="tracking_number" required>
-                <button type="submit">Consultar</button>
-            </form>
-            <div id="bt__result"></div>
-        ';
+        $angleRight = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/></svg>';
+        return "
+            <div class='bt__boxes_tracker'>
+                <div class='bt__header'>
+                    <h1 class='bt__main_title bt__text_underground'>Tracking</h1>
+                    <form id='bt__form' class='bt__form'>
+                        <label for='bt_tracking_number'>Número de seguimiento:</label>
+                        <div class='bt__input_container'>
+                            <input type='text' id='bt_tracking_number' name='tracking_number' class='bt_tracking_number' placeholder='Número de Tracking' required>
+                            <button type='submit' class='bt__button'>$angleRight</button>
+                        </div>
+                    </form>
+                </div>
+                <div id='bt__result'></div>
+            </div>
+        ";
     }
 
     public static function consultar_tracking_number($tracking_number) {

@@ -7,11 +7,6 @@
 
 <div class="bt__tracking-wrapper">
 
-    <div class="bt__header">
-        <h2>Tracking</h2>
-        <a href="<?php echo esc_url(remove_query_arg('boxes_tracking_number')); ?>" class="bt__button">NUEVA BÚSQUEDA</a>
-    </div>
-
     <div class="bt__summary">
         <p><strong>Código:</strong> (<?php echo esc_html(strtoupper($data['carrier'])); ?>) <?php echo esc_html($data['tracking_number']); ?></p>
 
