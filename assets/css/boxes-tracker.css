@@ -2,14 +2,16 @@
     --bt-font-family: 'Ubuntu', serif;
     --bt-primary-color: #e31837;
     --bt-text-color: #222;
-    --bt-heading-color: #666;
+    --bt-table-color: #1c1819;
     --bt-subtext-color: #322c1f;
     --bt-var1-color: #edebeb;
     --bt-var2-color: white;
+    --bt-var3-color: black;
 }
 
 .bt__boxes_tracker {
-    max-width: 450px;
+    font-family: var(--bt-font-family);
+    max-width: 470px;
 
     .bt__header {
         display: flex;
@@ -51,8 +53,7 @@
         display: flex;
         flex-direction: column;
         width: 100%;
-        font-family: var(--bt-font-family);
-
+        
         label {
             color: var(--bt-subtext-color);
             font-size: 16px;
@@ -96,7 +97,6 @@
     }
 
     .bt__tracking-wrapper {
-        font-family: var(--bt-font-family);
         max-width: 700px;
         margin: 20px auto;
     }
@@ -113,10 +113,24 @@
 
     .bt__summary {
         margin-top: 20px;
+        margin-bottom: 40px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
 
         p {
-            font-size: 1.1em;
-            color: var(--bt-subtext-color);
+            font-size: 20px;
+            color: var(--bt-primary-color);
+            display: flex;
+            flex-direction: column;
+            width: calc(50% - 0.5rem);
+            margin: 0;
+
+            span {
+                font-size: 16px;
+                color: var(--bt-subtext-color);
+            }
+
         }
     } 
 
@@ -125,25 +139,32 @@
         border-collapse: collapse;
         margin-top: 20px;
 
-        th, rd {
+        th, td {
             border-bottom: 1px solid var(--bt-var1-color);
             padding: 10px;
             text-align: left;
+            color: var(--bt-table-color);
+            font-size: 16px;
         }
 
         th {
             text-transform: uppercase;
-            color: var(--bt-heading-color);
-            font-size: 0.9em;
+            font-weight: 300;
         }
 
         td {
-            color: var(--bt-text-color);
-            font-size: 1em;
+            font-weight: 400;
+            width: 50%;
         }
     }
-
-    #bt__result {
-        font-family: var(--bt-font-family);
+    
+    .bt__title_response {
+        font-size: 26px;
+        line-height: 1.1;
+        margin-bottom: 20px;
+        font-weight: 700;
+        letter-spacing: .025em;
+        color: var(--bt-var3-color);
+        margin-top: 0;
     }
 }

@@ -34,7 +34,7 @@
                     <tr>
                         <td>
                             <?php
-                                $formatted_date = date('Y-m-d H:i', strtotime($event['timestamp']));
+                                $formatted_date = date('Y-m-d H:i:s', strtotime($event['timestamp']));
                                 echo esc_html($formatted_date);
                             ?>
                         </td>
