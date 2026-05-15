@@ -23,6 +23,63 @@ class BoxesTracker {
         // AJAX
         add_action('wp_ajax_boxes_tracker_lookup', [self::class, 'handle_ajax']);
         add_action('wp_ajax_nopriv_boxes_tracker_lookup', [self::class, 'handle_ajax']);
+
+        // Settings page
+        add_action('admin_menu', [self::class, 'add_admin_menu']);
+        add_action('admin_init', [self::class, 'register_settings']);
+    }
+
+    public static function add_admin_menu() {
+        add_options_page(
+            'Boxes Tracker Settings',
+            'Boxes Tracker',
+            'manage_options',
+            'boxes-tracker',
+            [self::class, 'settings_page_html']
+        );
+    }
+
+    public static function register_settings() {
+        register_setting('boxes_tracker_settings_group', 'boxes_tracker_api_url');
+
+        add_settings_section(
+            'boxes_tracker_main_section',
+            'Configuración de la API',
+            null,
+            'boxes-tracker'
+        );
+
+        add_settings_field(
+            'boxes_tracker_api_url_field',
+            'URL Base de la API',
+            [self::class, 'api_url_field_html'],
+            'boxes-tracker',
+            'boxes_tracker_main_section'
+        );
+    }
+
+    public static function api_url_field_html() {
+        $api_url = get_option('boxes_tracker_api_url', '');
+        echo '<input type="url" name="boxes_tracker_api_url" value="' . esc_attr($api_url) . '" style="width: 100%; max-width: 600px;" placeholder="https://api.ejemplo.com/endpoint">';
+        echo '<p class="description">Introduce la URL base de la API sin parámetros.</p>';
+    }
+
+    public static function settings_page_html() {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+        ?>
+        <div class="wrap">
+            <h1>Ajustes de Boxes Tracker</h1>
+            <form action="options.php" method="post">
+                <?php
+                settings_fields('boxes_tracker_settings_group');
+                do_settings_sections('boxes-tracker');
+                submit_button();
+                ?>
+            </form>
+        </div>
+        <?php
     }
 
     public static function enqueue_assets() {
@@ -64,21 +121,69 @@ class BoxesTracker {
         ";
     }
 
-    public static function consultar_tracking_number($tracking_number) {
-        $url = "https://boxes-tracker-api.diegoesolorzano.workers.dev/track";
-
-        $response = wp_remote_post($url, [
-            'headers' => ['Content-Type' => 'application/json'],
-            'body'    => json_encode(['tracking_number' => $tracking_number]),
-            'timeout' => 15,
-        ]);
-
-        if (is_wp_error($response)) {
-            return ['error' => true, 'message' => $response->get_error_message()];
+    public static function detect_courier($tracking_number) {
+        $tracking_number = strtoupper(trim($tracking_number));
+        
+        if (preg_match('/\b(1Z[0-9A-Z]{16})\b/', $tracking_number)) {
+            return ['UPS'];
+        }
+        
+        $couriers = [];
+        
+        if (preg_match('/^\d{10}$/', $tracking_number)) {
+            $couriers[] = 'DHL';
+        }
+        
+        if (preg_match('/^\d{11}$/', $tracking_number)) {
+            $couriers[] = 'COORDINADORA';
+        }
+        
+        if (preg_match('/^\d{12}$/', $tracking_number) || preg_match('/^\d{15}$/', $tracking_number) || preg_match('/^\d{20}$/', $tracking_number)) {
+            $couriers[] = 'FEDEX';
         }
 
-        $body = wp_remote_retrieve_body($response);
-        return json_decode($body, true);
+        if (empty($couriers)) {
+            return ['UPS', 'DHL', 'FEDEX', 'COORDINADORA'];
+        }
+        
+        return $couriers;
+    }
+
+    public static function consultar_tracking_number($tracking_number) {
+        $api_url = get_option('boxes_tracker_api_url');
+        if (empty($api_url)) {
+            return ['error' => true, 'message' => 'La URL de la API no está configurada.'];
+        }
+
+        $couriers = self::detect_courier($tracking_number);
+        $last_error = '';
+
+        foreach ($couriers as $courier) {
+            $request_url = add_query_arg([
+                'courier' => $courier,
+                'tracking' => $tracking_number
+            ], $api_url);
+
+            $response = wp_remote_get($request_url, [
+                'timeout' => 15,
+            ]);
+
+            if (is_wp_error($response)) {
+                $last_error = $response->get_error_message();
+                continue;
+            }
+
+            $body = wp_remote_retrieve_body($response);
+            $data = json_decode($body, true);
+
+            if (isset($data['ok']) && $data['ok'] === true) {
+                return $data;
+            } else {
+                $last_error = isset($data['description']) && !empty($data['description']) ? $data['description'] : 'Guía no encontrada.';
+            }
+        }
+
+        return ['error' => true, 'message' => $last_error ?: 'No se encontró información para este número de guía.'];
     }
 
     public static function handle_ajax() {

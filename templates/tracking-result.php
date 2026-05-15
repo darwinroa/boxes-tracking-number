@@ -9,14 +9,10 @@
     <h3 class="bt__title_response">Informaciones envío</h3>
 
     <div class="bt__summary">
-        <p><span>Código:</span> (<?php echo esc_html(strtoupper($data['carrier'])); ?>) <?php echo esc_html($data['tracking_number']); ?></p>
+        <p><span>Código:</span> (<?php echo esc_html(strtoupper($data['service'] ?? '')); ?>) <?php echo esc_html($tracking_number); ?></p>
 
-        <?php if (!empty($data['estimated_delivery'])): ?>
-            <p><span>La entrega se ha realizado el:</span> <?php echo esc_html(date('d-m-Y H:i', strtotime($data['estimated_delivery']))); ?></p>
-        <?php endif; ?>
-
-        <?php if (!empty($data['signed_by'])): ?>
-            <p><span>Firmado por:</span> <?php echo esc_html($data['signed_by']); ?></p>
+        <?php if (!empty($data['estimatedDelivery'])): ?>
+            <p><span>Fecha de entrega estimada:</span> <?php echo esc_html(date('d-m-Y', strtotime($data['estimatedDelivery']))); ?></p>
         <?php endif; ?>
     </div>
 
@@ -34,11 +30,11 @@
                     <tr>
                         <td>
                             <?php
-                                $formatted_date = date('Y-m-d H:i:s', strtotime($event['timestamp']));
+                                $formatted_date = date('Y-m-d H:i', strtotime($event['time']));
                                 echo esc_html($formatted_date);
                             ?>
                         </td>
-                        <td><?php echo esc_html($event['status'] . (!empty($event['location']) ? ' - ' . $event['location'] : '')); ?></td>
+                        <td><?php echo esc_html($event['desc'] . (!empty($event['loc']) ? ' - ' . $event['loc'] : '')); ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
