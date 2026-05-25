@@ -80,17 +80,23 @@
                 height: 38px;
                 line-height: 38px;
                 width: 100%;
+                max-width: 100%;
                 border: none;
                 border-radius: 0;
 
                 &:focus, &:focus-visible {
                     outline: none;
                 }
+
+                &::placeholder {
+                    color: var(--bt-subtext-color);
+                }
             }
 
             .bt__button {
                 height: 38px;
                 aspect-ratio: 1;
+                margin: 0;
                 
                 svg {
                     width: 10px;
@@ -105,7 +111,7 @@
         margin: 20px auto;
     }
 
-    .bt__button {
+    .bt__button, .bt__button:hover {
         display: inline-block;
         background: var(--bt-primary-color);
         color: var(--bt-var2-color);
