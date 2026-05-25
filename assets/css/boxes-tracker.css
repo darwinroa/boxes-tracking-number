@@ -12,6 +12,9 @@
 .bt__boxes_tracker {
     font-family: var(--bt-font-family);
     max-width: 470px;
+    min-height: 50vh;
+    margin: auto;
+    color: var(--bt-text-color);
 
     .bt__header {
         display: flex;
@@ -29,6 +32,7 @@
             font-weight: 700;
             
             &.bt__text_underground {
+                color: var(--bt-text-color);
                 position: relative;
                 padding-bottom: 17px;
                 display: inline-block;
